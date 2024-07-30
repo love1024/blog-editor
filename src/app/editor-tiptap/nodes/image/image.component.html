@@ -1,0 +1,61 @@
+<figure
+  class="flex flex-col items-center mb-8"
+  (mouseenter)="inHover.set(true)"
+  (mouseleave)="inHover.set(false)"
+>
+  @if (isUploaded()) {
+  <img
+    #imgRef
+    [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
+    [ngSrc]="src()"
+    [attr.alt]="altText()"
+    contenteditable="false"
+  />
+  } @else {
+  <img
+    #imgRef
+    [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
+    [src]="src()"
+    [attr.alt]="altText()"
+    contenteditable="false"
+  />
+  }
+
+  <figcaption
+    [ngClass]="{ focused: editable() && (inFocus() || inHover()) }"
+    tiptapNodeViewContent
+    class="text-sm mt-2"
+  ></figcaption>
+</figure>
+
+<template #imageTooltip>
+  <div class="p-2">
+    <div class="cursor-pointer hover:text-primary" (click)="deleteImage()">
+      <i class="ri-delete-bin-line"></i>
+      <span class="inline-block ml-2">Delete</span>
+    </div>
+    <hr class="my-2" />
+    <div
+      class="cursor-pointer hover:text-primary"
+      (click)="openAltTextDialog()"
+    >
+      <i class="ri-edit-line"></i>
+      <span class="inline-block ml-2">Alt Text</span>
+    </div>
+  </div>
+</template>
+
+<ng-template #altTextDialog>
+  <p mat-dialog-title>Alternate Text</p>
+  <mat-dialog-content>
+    <p>Text for people with visual impairments</p>
+    <mat-form-field class="w-full">
+      <mat-label>Enter here...</mat-label>
+      <input matInput [(ngModel)]="altText" type="text" cdkFocusInitial />
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-button [mat-dialog-close]="altText">Add</button>
+  </mat-dialog-actions>
+</ng-template>

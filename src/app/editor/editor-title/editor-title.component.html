@@ -1,0 +1,11 @@
+<h1
+  autofocus="true"
+  class="cursor-text"
+  [attr.contenteditable]="readonly() ? false : true"
+  placeholder="Enter Title Here......"
+  [textContent]="title"
+  (keydown)="onKeyDown($event)"
+  (paste)="onTitlePaste($event)"
+  (input)="onTitleInput($event)"
+  (focus)="onFocus()"
+></h1>
