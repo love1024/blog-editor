@@ -110,6 +110,13 @@ blockquote strong {
   color: #2db5e2;
 }
 
+// Width of children
+.tiptap > * {
+  width: 50%;
+  display: block;
+  margin: 0 auto;
+}
+
 .tiptap > *:not(h3) {
   margin-bottom: 2rem !important;
 }

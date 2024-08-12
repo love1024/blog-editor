@@ -11,7 +11,12 @@ export interface ImageOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     image: {
-      setImage: (options: { src: string; alt?: string }) => ReturnType;
+      setImage: (options: {
+        src: File;
+        alt?: string;
+        width?: number;
+        height?: number;
+      }) => ReturnType;
     };
   }
 }
@@ -24,6 +29,7 @@ export const ImageExtension = (injector: Injector): Node => {
     marks: 'bold link',
     draggable: true,
     isolating: true,
+    selectable: true,
 
     addAttributes() {
       return {
@@ -32,6 +38,12 @@ export const ImageExtension = (injector: Injector): Node => {
         },
         alt: {
           default: '',
+        },
+        height: {
+          default: null,
+        },
+        width: {
+          default: null,
         },
       };
     },
@@ -123,14 +135,6 @@ export const ImageExtension = (injector: Injector): Node => {
 
             let nextNodePos = $from.pos;
             for (let n of editor.$doc.children) {
-              console.log(
-                n.pos,
-                n.from,
-                n.to,
-                n.content.size,
-                n.node.nodeSize,
-                n.node.type.name
-              );
               if (n.pos > nextNodePos) {
                 // For blockquote, we need to subtract one more
                 nextNodePos =
@@ -143,6 +147,17 @@ export const ImageExtension = (injector: Injector): Node => {
 
             editor.commands.focus(nextNodePos);
             return true;
+          }
+          return false;
+        },
+        Backspace: ({ editor }) => {
+          if (editor.isActive('imageComponent')) {
+            const { state, view } = editor;
+            const { selection } = state;
+            const size = selection.$anchor.node().content.size;
+            if (size === 0) {
+              editor.commands.deleteNode('imageComponent');
+            }
           }
           return false;
         },

@@ -11,52 +11,16 @@ import { Plugin } from '@tiptap/pm/state';
 export const getCustomExtension = (injector: Injector): AnyExtension[] => {
   return [
     Bold.extend({
-      addKeyboardShortcuts() {
-        return {
-          'Mod-b': ({ editor }) => {
-            if (editor.isActive('heading')) {
-              return true;
-            }
-            return this.editor.chain().focus().toggleBold().run();
-          },
-        };
-      },
+      inclusive: false,
     }),
     Italic.extend({
-      addKeyboardShortcuts() {
-        return {
-          'Mod-i': ({ editor }) => {
-            if (editor.isActive('heading')) {
-              return true;
-            }
-            return this.editor.chain().focus().toggleItalic().run();
-          },
-        };
-      },
+      inclusive: false,
     }),
     Underline.extend({
-      addKeyboardShortcuts() {
-        return {
-          'Mod-u': ({ editor }) => {
-            if (editor.isActive('heading')) {
-              return true;
-            }
-            return this.editor.chain().focus().toggleUnderline().run();
-          },
-        };
-      },
+      inclusive: false,
     }),
     Strike.extend({
-      addKeyboardShortcuts() {
-        return {
-          'Mod-Shift-s': ({ editor }) => {
-            if (editor.isActive('heading')) {
-              return true;
-            }
-            return this.editor.chain().focus().toggleStrike().run();
-          },
-        };
-      },
+      inclusive: false,
     }),
     Blockquote.extend({
       content: 'paragraph', // Only allow one paragraph
@@ -92,12 +56,6 @@ export const getCustomExtension = (injector: Injector): AnyExtension[] => {
       },
       addKeyboardShortcuts() {
         return {
-          'Mod-Shift-b': ({ editor }) => {
-            if (editor.isActive('heading')) {
-              return true;
-            }
-            return this.editor.chain().focus().toggleBlockquote().run();
-          },
           Enter: ({ editor }) => {
             // Don't allow enter in the caption
             if (editor.isActive('blockquote')) {

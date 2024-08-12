@@ -1,5 +1,5 @@
 <div class="w-full flex items-center flex-col pt-14">
-  <div class="w-1/2 pt-12">
+  <div class="pt-12 w-full">
     <!-- Toolbar  -->
     <div
       class="fixed bg-white top-12 border-0 border-b w-full z-10 left-0 flex justify-center text-2xl"
@@ -138,7 +138,10 @@
 
     <!-- Editor Title  -->
     <div class="w-full py-3">
-      <app-editor-title (focused)="disabled = true" />
+      <app-editor-title
+        class="block w-1/2 mx-auto"
+        (focused)="disabled = true"
+      />
     </div>
 
     <div id="editor"></div>

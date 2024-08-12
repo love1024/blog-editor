@@ -9,7 +9,11 @@
     [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
     [ngSrc]="src()"
     [attr.alt]="altText()"
+    [width]="imgWidth()"
+    [height]="imgHeight()"
     contenteditable="false"
+    [ngSrcset]="srcset()"
+    sizes="(max-width: 600px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, (max-width: 1280px) 60vw, 50vw"
   />
   } @else {
   <img

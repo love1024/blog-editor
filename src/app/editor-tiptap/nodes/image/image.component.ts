@@ -1,4 +1,9 @@
-import { NgClass, NgIf, NgOptimizedImage } from '@angular/common';
+import {
+  NgClass,
+  NgIf,
+  NgOptimizedImage,
+  provideImageKitLoader,
+} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,9 +25,10 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AngularNodeViewComponent, NgxTiptapModule } from 'ngx-tiptap';
-import { finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import mediumZoom from 'medium-zoom';
+import { ImageService } from './image.service';
 
 @Component({
   selector: 'app-image',
@@ -38,6 +44,7 @@ import mediumZoom from 'medium-zoom';
     MatFormFieldModule,
     MatInputModule,
   ],
+  providers: [provideImageKitLoader('https://ik.imagekit.io/readolio')],
   templateUrl: './image.component.html',
   styleUrl: './image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,20 +52,55 @@ import mediumZoom from 'medium-zoom';
 export class ImageComponent extends AngularNodeViewComponent implements OnInit {
   src = signal('');
   isUploaded = signal(false);
-  inFocus = signal(true);
+  inFocus = signal(false);
   inHover = signal(false);
   altText = signal('');
   editable = signal(true);
+  imgWidth = signal(0);
+  imgHeight = signal(0);
+  srcset = signal('');
   img = viewChild<ElementRef<HTMLImageElement>>('imgRef');
   imageTooltip = viewChild<ElementRef<HTMLTemplateElement>>('imageTooltip');
   altTextDialog = viewChild<TemplateRef<ElementRef>>('altTextDialog');
   private readonly dialog = inject(MatDialog);
   private dialogRef?: MatDialogRef<ElementRef<unknown>, string>;
   private tippyRef?: TippyInstance<unknown>;
+  private readonly imageService = inject(ImageService);
 
   ngOnInit(): void {
-    this.src.set(this.node.attrs['src'] ?? '');
-    this.altText.set(this.node.attrs['alt'] ?? '');
+    if (this.node.attrs['src'] instanceof File) {
+      this.toBase64(this.node.attrs['src']).subscribe((base64) => {
+        this.src.set(base64);
+        this.altText.set(this.node.attrs['alt']);
+        this.updateAttributes({ src: base64 });
+      });
+
+      this.imageService.uploadImage(this.node.attrs['src']).subscribe((res) => {
+        this.updateAttributes({
+          src: res.name,
+          width: res.width,
+          height: res.height,
+        });
+        this.src.set(res.name);
+        this.imgWidth.set(res.width);
+        this.imgHeight.set(res.height);
+        this.isUploaded.set(true);
+        this.srcset.set(this.generateSrcset(res.width));
+      });
+    } else if (
+      this.node.attrs['src'].endsWith('jpeg') ||
+      this.node.attrs['src'].endsWith('jpg')
+    ) {
+      this.src.set(this.node.attrs['src']);
+      this.altText.set(this.node.attrs['alt']);
+      this.imgWidth.set(this.node.attrs['width']);
+      this.imgHeight.set(this.node.attrs['height']);
+      this.isUploaded.set(true);
+      this.srcset.set(this.generateSrcset(this.imgWidth()));
+    } else {
+      this.src.set(this.node.attrs['src']);
+      this.altText.set(this.node.attrs['alt']);
+    }
     this.editable.set(this.editor.isEditable);
     if (this.editable()) {
       this.subscribeToSelectionUpdate();
@@ -81,7 +123,7 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
             allowHTML: true,
             trigger: 'click',
           });
-          this.tippyRef?.show();
+          this.inFocus() && this.tippyRef?.show();
         }
       }, 0);
     } else {
@@ -145,5 +187,25 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
         this.tippyRef?.hide();
       }
     });
+  }
+
+  toBase64(file: File): Observable<string> {
+    return new Observable((observer) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        observer.next(reader.result as string);
+        observer.complete();
+      };
+      reader.onerror = observer.error;
+    });
+  }
+
+  generateSrcset(width: number): string {
+    const sizes = [320, 480, 640, 768, 1024, 1280, 1600, 1920, 2560];
+    return sizes
+      .filter((size) => size <= width) // Filter to only include sizes up to the intrinsic width
+      .map((size) => `${size}w`)
+      .join(', ');
   }
 }

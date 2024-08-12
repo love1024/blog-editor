@@ -93,7 +93,7 @@ export class EditorTiptapComponent implements OnInit {
         Placeholder.configure({
           placeholder: 'Enter Your Store Here...',
         }),
-        Heading.configure({
+        Heading.extend({ marks: '' }).configure({
           levels: [2, 3],
         }),
         Link.extend({ inclusive: false }).configure({
@@ -255,33 +255,19 @@ export class EditorTiptapComponent implements OnInit {
     const element = event.currentTarget as HTMLInputElement;
     let fileList: FileList | null = element.files;
     if (fileList && fileList.length > 0) {
-      this.toBase64(fileList[0]).subscribe((res) => {
-        this.editor
-          ?.chain()
-          .focus()
-          .setImage({
-            src: res,
-          })
-          .run();
-      });
+      this.editor
+        ?.chain()
+        .focus()
+        .setImage({
+          src: fileList[0],
+        })
+        .run();
     }
   }
 
   onFileUploadClick(event: Event): void {
     const element = event.currentTarget as HTMLInputElement;
     element.value = '';
-  }
-
-  toBase64(file: File): Observable<string> {
-    return new Observable((observer) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        observer.next(reader.result as string);
-        observer.complete();
-      };
-      reader.onerror = observer.error;
-    });
   }
 
   toggleMark(mark: string): void {
