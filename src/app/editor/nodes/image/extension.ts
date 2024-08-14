@@ -4,10 +4,6 @@ import { AngularNodeViewRenderer } from 'ngx-tiptap';
 import { ImageComponent } from './image.component';
 import { Plugin } from '@tiptap/pm/state';
 
-export interface ImageOptions {
-  HTMLAttributes: Record<string, any>;
-}
-
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     image: {
@@ -56,6 +52,7 @@ export const ImageExtension = (injector: Injector): Node => {
       ];
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     toDOM(node: any) {
       return ['figure', ['img', node.attrs], ['figurecaption', 0]];
     },
@@ -71,7 +68,7 @@ export const ImageExtension = (injector: Injector): Node => {
     addCommands() {
       return {
         setImage:
-          (options) =>
+          options =>
           ({ commands }) => {
             return commands.insertContent({
               type: this.name,
@@ -86,12 +83,12 @@ export const ImageExtension = (injector: Injector): Node => {
         Enter: ({ editor }) => {
           // Don't allow enter in the caption
           if (editor.isActive('imageComponent')) {
-            const { state, view } = editor;
+            const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
 
             let nextNodePos = $from.pos;
-            for (let n of editor.$doc.children) {
+            for (const n of editor.$doc.children) {
               if (n.pos > nextNodePos) {
                 nextNodePos = n.to - 1;
                 break;
@@ -106,14 +103,14 @@ export const ImageExtension = (injector: Injector): Node => {
         ArrowUp: ({ editor }) => {
           // Don't allow enter in the caption
           if (editor.isActive('imageComponent')) {
-            const { state, view } = editor;
+            const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
 
-            let currentPos = $from.pos;
+            const currentPos = $from.pos;
 
             let prevNodePos = 0;
-            for (let n of editor.$doc.children) {
+            for (const n of editor.$doc.children) {
               if (currentPos >= n.from && currentPos <= n.to) {
                 break;
               } else {
@@ -129,12 +126,12 @@ export const ImageExtension = (injector: Injector): Node => {
         ArrowDown: ({ editor }) => {
           // Don't allow enter in the caption
           if (editor.isActive('imageComponent')) {
-            const { state, view } = editor;
+            const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
 
             let nextNodePos = $from.pos;
-            for (let n of editor.$doc.children) {
+            for (const n of editor.$doc.children) {
               if (n.pos > nextNodePos) {
                 // For blockquote, we need to subtract one more
                 nextNodePos =
@@ -152,7 +149,7 @@ export const ImageExtension = (injector: Injector): Node => {
         },
         Backspace: ({ editor }) => {
           if (editor.isActive('imageComponent')) {
-            const { state, view } = editor;
+            const { state } = editor;
             const { selection } = state;
             const size = selection.$anchor.node().content.size;
             if (size === 0) {
@@ -180,7 +177,7 @@ export const ImageExtension = (injector: Injector): Node => {
                 }
 
                 const images = Array.from(event.dataTransfer.files).filter(
-                  (file) => /image/i.test(file.type)
+                  file => /image/i.test(file.type)
                 );
 
                 if (images.length === 0) {
@@ -195,10 +192,10 @@ export const ImageExtension = (injector: Injector): Node => {
                   top: event.clientY,
                 });
 
-                images.forEach((image) => {
+                images.forEach(image => {
                   const reader = new FileReader();
 
-                  reader.onload = (readerEvent) => {
+                  reader.onload = readerEvent => {
                     const node = schema.nodes['imageComponent'].create({
                       src: readerEvent.target?.result,
                     });
@@ -222,7 +219,7 @@ export const ImageExtension = (injector: Injector): Node => {
                 }
 
                 const images = Array.from(event.clipboardData.files).filter(
-                  (file) => /image/i.test(file.type)
+                  file => /image/i.test(file.type)
                 );
 
                 if (images.length === 0) {
@@ -233,10 +230,10 @@ export const ImageExtension = (injector: Injector): Node => {
 
                 const { schema } = view.state;
 
-                images.forEach((image) => {
+                images.forEach(image => {
                   const reader = new FileReader();
 
-                  reader.onload = (readerEvent) => {
+                  reader.onload = readerEvent => {
                     const node = schema.nodes['imageComponent'].create({
                       src: readerEvent.target?.result,
                     });

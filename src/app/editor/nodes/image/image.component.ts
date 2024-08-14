@@ -14,6 +14,7 @@ import {
   inject,
   signal,
   viewChild,
+  AfterViewInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +30,7 @@ import { finalize, Observable } from 'rxjs';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import mediumZoom from 'medium-zoom';
 import { ImageService } from './image.service';
+import { IMAGE_SCREEN_BREAKPOINTS } from '@core/application/const';
 
 @Component({
   selector: 'app-image',
@@ -49,7 +51,10 @@ import { ImageService } from './image.service';
   styleUrl: './image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImageComponent extends AngularNodeViewComponent implements OnInit {
+export class ImageComponent
+  extends AngularNodeViewComponent
+  implements OnInit, AfterViewInit
+{
   src = signal('');
   isUploaded = signal(false);
   inFocus = signal(false);
@@ -69,13 +74,13 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.node.attrs['src'] instanceof File) {
-      this.toBase64(this.node.attrs['src']).subscribe((base64) => {
+      this.toBase64(this.node.attrs['src']).subscribe(base64 => {
         this.src.set(base64);
         this.altText.set(this.node.attrs['alt']);
         this.updateAttributes({ src: base64 });
       });
 
-      this.imageService.uploadImage(this.node.attrs['src']).subscribe((res) => {
+      this.imageService.uploadImage(this.node.attrs['src']).subscribe(res => {
         this.updateAttributes({
           src: res.name,
           width: res.width,
@@ -123,7 +128,9 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
             allowHTML: true,
             trigger: 'click',
           });
-          this.inFocus() && this.tippyRef?.show();
+          if (this.inFocus()) {
+            this.tippyRef?.show();
+          }
         }
       }, 0);
     } else {
@@ -163,6 +170,9 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
       });
   }
 
+  /**
+   * Deletes the current image node from the editor.
+   */
   deleteImage(): void {
     this.editor.commands.deleteNode('imageComponent');
   }
@@ -172,7 +182,7 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
       const { from, to } = this.editor.state.selection;
       // We only want to highlight the current image node, so node === this.node
       let anyImageFound = false;
-      this.editor.state.doc.nodesBetween(from, to, (node, pos) => {
+      this.editor.state.doc.nodesBetween(from, to, node => {
         if (node.type.name === 'imageComponent' && node === this.node) {
           // Only show tooltip if it was not in focus before
           if (!this.inFocus()) {
@@ -189,8 +199,13 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
     });
   }
 
+  /**
+   * Converts a File object to a base64 string.
+   * @param file - The File object to be converted.
+   * @returns An Observable that emits the base64 string.
+   */
   toBase64(file: File): Observable<string> {
-    return new Observable((observer) => {
+    return new Observable(observer => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -201,11 +216,16 @@ export class ImageComponent extends AngularNodeViewComponent implements OnInit {
     });
   }
 
+  /**
+   * Generates the srcset attribute value for an image based on the given width.
+   *
+   * @param width - The width of the image.
+   * @returns The srcset attribute value as a string.
+   */
   generateSrcset(width: number): string {
-    const sizes = [320, 480, 640, 768, 1024, 1280, 1600, 1920, 2560];
-    return sizes
-      .filter((size) => size <= width) // Filter to only include sizes up to the intrinsic width
-      .map((size) => `${size}w`)
+    // Filter to only include sizes up to the intrinsic width of the image
+    return IMAGE_SCREEN_BREAKPOINTS.filter(size => size <= width)
+      .map(size => `${size}w`)
       .join(', ');
   }
 }

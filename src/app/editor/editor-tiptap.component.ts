@@ -20,7 +20,7 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import Youtube from '@tiptap/extension-youtube';
 import { Heading, Level } from '@tiptap/extension-heading';
-import { EditorTitleComponent } from '../editor/editor-title/editor-title.component';
+import { EditorTitleComponent } from './editor-title/editor-title.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -35,7 +35,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { NgClass } from '@angular/common';
 import { getCustomExtension } from './custom-extensions';
 import { FormsModule } from '@angular/forms';
-import { Observable, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 import { Mark, Node } from '@tiptap/pm/model';
 import { Marks, Nodes } from './editor-tiptap.model';
 import { TrailingNode } from './extensions/trailing-node';
@@ -110,7 +110,7 @@ export class EditorTiptapComponent implements OnInit {
         BubbleMenu.configure({
           pluginKey: 'linkBubble',
           element: document.querySelector('#linkBubble') as HTMLElement,
-          shouldShow: ({ editor, view, state, oldState, from, to }) => {
+          shouldShow: ({ state, from, to }) => {
             // Show link popup if it contains link mark in a selection or
             // the current cursor point
             const fromNode = state.doc.nodeAt(from);
@@ -127,7 +127,7 @@ export class EditorTiptapComponent implements OnInit {
           },
         }),
         ImageExtension(this.injector),
-        ...getCustomExtension(this.injector),
+        ...getCustomExtension(),
       ],
       onSelectionUpdate: ({ editor }) => {
         const { from, to } = editor.state.selection;
@@ -135,9 +135,7 @@ export class EditorTiptapComponent implements OnInit {
         if (node) {
           // Show the selection even if no text is selected
           // but the link is already there
-          const link = node.marks.filter(
-            (mark) => mark.type.name === Marks.LINK
-          );
+          const link = node.marks.filter(mark => mark.type.name === Marks.LINK);
           if (link.length > 0) {
             this.isSelection = true;
             return;
@@ -180,7 +178,7 @@ export class EditorTiptapComponent implements OnInit {
       this.editor?.chain().focus().unsetLink().run();
 
       // Check if after disabling, we need to show link menu or not
-      const { from, to } = this.editor?.state.selection;
+      const { from, to } = this.editor?.state?.selection || { from: 0, to: 0 };
       this.isSelection = from !== to;
     } else {
       this.openLinkDialog();
@@ -253,7 +251,7 @@ export class EditorTiptapComponent implements OnInit {
 
   uploadFile(event: Event): void {
     const element = event.currentTarget as HTMLInputElement;
-    let fileList: FileList | null = element.files;
+    const fileList: FileList | null = element.files;
     if (fileList && fileList.length > 0) {
       this.editor
         ?.chain()
@@ -324,7 +322,7 @@ export class EditorTiptapComponent implements OnInit {
     if (node === null) {
       return null;
     }
-    const linkMark = node.marks.filter((mark) => mark.type.name === Marks.LINK);
+    const linkMark = node.marks.filter(mark => mark.type.name === Marks.LINK);
     return linkMark.length > 0 ? linkMark[0] : null;
   }
 }

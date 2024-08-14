@@ -1,40 +1,40 @@
 <figure
   class="flex flex-col items-center mb-8"
   (mouseenter)="inHover.set(true)"
-  (mouseleave)="inHover.set(false)"
->
+  (mouseleave)="inHover.set(false)">
   @if (isUploaded()) {
-  <img
-    #imgRef
-    [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
-    [ngSrc]="src()"
-    [attr.alt]="altText()"
-    [width]="imgWidth()"
-    [height]="imgHeight()"
-    contenteditable="false"
-    [ngSrcset]="srcset()"
-    sizes="(max-width: 600px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, (max-width: 1280px) 60vw, 50vw"
-  />
+    <img
+      #imgRef
+      [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
+      [ngSrc]="src()"
+      [attr.alt]="altText()"
+      [width]="imgWidth()"
+      [height]="imgHeight()"
+      contenteditable="false"
+      [ngSrcset]="srcset()"
+      sizes="(max-width: 600px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, (max-width: 1280px) 60vw, 50vw" />
   } @else {
-  <img
-    #imgRef
-    [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
-    [src]="src()"
-    [attr.alt]="altText()"
-    contenteditable="false"
-  />
+    <img
+      #imgRef
+      [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
+      [src]="src()"
+      [attr.alt]="altText()"
+      contenteditable="false" />
   }
 
   <figcaption
     [ngClass]="{ focused: editable() && (inFocus() || inHover()) }"
     tiptapNodeViewContent
-    class="text-sm mt-2"
-  ></figcaption>
+    class="text-sm mt-2"></figcaption>
 </figure>
 
 <template #imageTooltip>
   <div class="p-2">
-    <div class="cursor-pointer hover:text-primary" (click)="deleteImage()">
+    <div
+      class="cursor-pointer hover:text-primary"
+      (click)="deleteImage()"
+      (keydown.enter)="deleteImage()"
+      tabindex="0">
       <i class="ri-delete-bin-line"></i>
       <span class="inline-block ml-2">Delete</span>
     </div>
@@ -42,7 +42,8 @@
     <div
       class="cursor-pointer hover:text-primary"
       (click)="openAltTextDialog()"
-    >
+      (keydown.enter)="openAltTextDialog()"
+      tabindex="1">
       <i class="ri-edit-line"></i>
       <span class="inline-block ml-2">Alt Text</span>
     </div>

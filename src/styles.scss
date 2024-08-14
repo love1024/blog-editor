@@ -1,6 +1,6 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
-@use "@angular/material" as mat;
+@use '@angular/material' as mat;
 // Plus imports for other components in your app.
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -37,7 +37,7 @@ $readolio-theme: mat.define-theme(
 // @include mat.color-variants-backwards-compatibility($readolio-theme);
 /* You can add global styles to this file, and also import other style files */
 
-@import "../node_modules/tippy.js/dist/tippy";
+@import '../node_modules/tippy.js/dist/tippy';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -48,7 +48,7 @@ body {
 }
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 h1 {
@@ -71,7 +71,7 @@ h3 {
 
 // Add placeholder to the figcaption
 figcaption.focused > div:has(> br)::before {
-  content: "Enter image caption here...";
+  content: 'Enter image caption here...';
   color: #adb5bd;
   float: left;
   height: 0;
@@ -102,7 +102,7 @@ blockquote strong {
 
 // TipTap
 
-.tiptap[contenteditable="false"] a {
+.tiptap[contenteditable='false'] a {
   cursor: pointer;
 }
 
@@ -149,7 +149,7 @@ button[disabled] i {
 /* Blockquote main style */
 blockquote {
   position: relative;
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   padding: 30px 0;
   width: 100%;
   z-index: 1;
@@ -171,7 +171,7 @@ blockquote p {
 /* Blockquote right double quotes */
 blockquote:after {
   position: absolute;
-  content: "”";
+  content: '”';
   font-size: 6rem;
   line-height: 0;
   bottom: -1.8rem;

@@ -8,9 +8,8 @@ describe('EditorTiptapComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditorTiptapComponent]
-    })
-    .compileComponents();
+      imports: [EditorTiptapComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditorTiptapComponent);
     component = fixture.componentInstance;

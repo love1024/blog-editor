@@ -1,16 +1,16 @@
-import { Component, Injector, inject } from '@angular/core';
+import { Component, Injector, inject, OnInit } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import BulletList from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
 import OrderedList from '@tiptap/extension-ordered-list';
 import Paragraph from '@tiptap/extension-paragraph';
-import { TrailingNode } from '../editor-tiptap/extensions/trailing-node';
+import { TrailingNode } from '../editor/extensions/trailing-node';
 import Text from '@tiptap/extension-text';
 import Heading from '@tiptap/extension-heading';
 import Link from '@tiptap/extension-link';
 import Youtube from '@tiptap/extension-youtube';
-import { ImageExtension } from '../editor-tiptap/nodes/image/extension';
-import { getCustomExtension } from '../editor-tiptap/custom-extensions';
+import { ImageExtension } from '../editor/nodes/image/extension';
+import { getCustomExtension } from '../editor/custom-extensions';
 import { EditorTitleComponent } from '../editor/editor-title/editor-title.component';
 
 @Component({
@@ -20,7 +20,7 @@ import { EditorTitleComponent } from '../editor/editor-title/editor-title.compon
   templateUrl: './viewer.component.html',
   styleUrl: './viewer.component.scss',
 })
-export class ViewerComponent {
+export class ViewerComponent implements OnInit {
   editor?: Editor;
   private readonly injector = inject(Injector);
 
@@ -55,7 +55,7 @@ export class ViewerComponent {
           },
         }),
         ImageExtension(this.injector),
-        ...getCustomExtension(this.injector),
+        ...getCustomExtension(),
       ],
     });
   }

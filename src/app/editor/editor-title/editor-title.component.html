@@ -1,5 +1,5 @@
 <h1
-  autofocus="true"
+  tabindex="0"
   class="cursor-text"
   [attr.contenteditable]="readonly() ? false : true"
   placeholder="Enter Title Here......"
@@ -7,5 +7,6 @@
   (keydown)="onKeyDown($event)"
   (paste)="onTitlePaste($event)"
   (input)="onTitleInput($event)"
-  (focus)="onFocus()"
-></h1>
+  (focus)="onFocus()">
+  &nbsp;
+</h1>

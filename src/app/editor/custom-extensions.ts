@@ -4,11 +4,10 @@ import Italic from '@tiptap/extension-italic';
 import Strike from '@tiptap/extension-strike';
 import Underline from '@tiptap/extension-underline';
 import Blockquote from '@tiptap/extension-blockquote';
-import { Injector } from '@angular/core';
 import ListItem from '@tiptap/extension-list-item';
 import { Plugin } from '@tiptap/pm/state';
 
-export const getCustomExtension = (injector: Injector): AnyExtension[] => {
+export const getCustomExtension = (): AnyExtension[] => {
   return [
     Bold.extend({
       inclusive: false,
@@ -34,7 +33,7 @@ export const getCustomExtension = (injector: Injector): AnyExtension[] => {
 
               newState.doc.descendants((node, pos) => {
                 if (node.type.name === 'blockquote') {
-                  node.forEach((child) => {
+                  node.forEach(child => {
                     if (child.type.name === 'paragraph') {
                       child.forEach((c, offset) => {
                         tr.removeMark(
@@ -59,12 +58,12 @@ export const getCustomExtension = (injector: Injector): AnyExtension[] => {
           Enter: ({ editor }) => {
             // Don't allow enter in the caption
             if (editor.isActive('blockquote')) {
-              const { state, view } = editor;
+              const { state } = editor;
               const { selection } = state;
               const { $from } = selection;
 
               let nextNodePos = $from.pos;
-              for (let n of editor.$doc.children) {
+              for (const n of editor.$doc.children) {
                 if (n.pos > nextNodePos) {
                   nextNodePos = n.pos;
                   break;

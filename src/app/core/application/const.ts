@@ -1,0 +1,3 @@
+export const IMAGE_SCREEN_BREAKPOINTS = [
+  320, 480, 640, 768, 1024, 1280, 1600, 1920, 2560,
+];
