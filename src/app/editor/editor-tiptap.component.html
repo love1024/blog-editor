@@ -49,15 +49,6 @@
         <button
           type="button"
           class="ml-3"
-          matTooltip="Underline"
-          [disabled]="disableFormatting || disabled"
-          (click)="toggleMark('underline')"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('underline') }">
-          <i class="ri-underline"></i>
-        </button>
-        <button
-          type="button"
-          class="ml-3"
           matTooltip="Strikethrough"
           [disabled]="disableFormatting || disabled"
           (click)="toggleMark('strike')"

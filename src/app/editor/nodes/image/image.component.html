@@ -4,32 +4,33 @@
   (mouseleave)="inHover.set(false)">
   @if (isUploaded()) {
     <img
+      (click)="onImageClick()"
       #imgRef
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
       [ngSrc]="src()"
       [attr.alt]="altText()"
       [width]="imgWidth()"
       [height]="imgHeight()"
-      contenteditable="false"
       [ngSrcset]="srcset()"
       sizes="(max-width: 600px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, (max-width: 1280px) 60vw, 50vw" />
   } @else {
     <img
+      (click)="onImageClick()"
       #imgRef
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
       [src]="src()"
       [attr.alt]="altText()"
-      contenteditable="false" />
+      (load)="onImageLoaded()" />
   }
 
   <figcaption
     [ngClass]="{ focused: editable() && (inFocus() || inHover()) }"
     tiptapNodeViewContent
-    class="text-sm mt-2"></figcaption>
+    class="text-sm mt-2 px-12"></figcaption>
 </figure>
 
 <template #imageTooltip>
-  <div class="p-2">
+  <div class="p-2" id="imageTooltip">
     <div
       class="cursor-pointer hover:text-primary"
       (click)="deleteImage()"

@@ -71,7 +71,7 @@ h3 {
 
 // Add placeholder to the figcaption
 figcaption.focused > div:has(> br)::before {
-  content: 'Enter image caption here...';
+  content: 'Optional image caption...';
   color: #adb5bd;
   float: left;
   height: 0;

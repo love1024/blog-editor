@@ -3,25 +3,32 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { AngularNodeViewRenderer } from 'ngx-tiptap';
 import { ImageComponent } from './image.component';
 import { Plugin } from '@tiptap/pm/state';
+import { Nodes } from '../../editor-tiptap.model';
+import { ImageService } from './image.service';
+
+interface ImageAttributes {
+  src: File;
+  alt?: string;
+  width?: number;
+  height?: number;
+  isNew: boolean;
+}
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     image: {
-      setImage: (options: {
-        src: File;
-        alt?: string;
-        width?: number;
-        height?: number;
-      }) => ReturnType;
+      setImage: (options: ImageAttributes) => ReturnType;
     };
   }
 }
 
 export const ImageExtension = (injector: Injector): Node => {
+  const imageService = injector.get(ImageService);
+
   return Node.create({
-    name: 'imageComponent',
-    group: 'block',
-    content: 'inline*',
+    name: Nodes.Image,
+    group: 'block', // It is part of the block group
+    content: 'inline*', // What content can go inside this node - Only inline nodes
     marks: 'bold link',
     draggable: true,
     isolating: true,
@@ -80,9 +87,10 @@ export const ImageExtension = (injector: Injector): Node => {
 
     addKeyboardShortcuts() {
       return {
+        // Take the user to the next node on enter click instead of inserting a new line
         Enter: ({ editor }) => {
           // Don't allow enter in the caption
-          if (editor.isActive('imageComponent')) {
+          if (editor.isActive(Nodes.Image)) {
             const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
@@ -100,9 +108,10 @@ export const ImageExtension = (injector: Injector): Node => {
           }
           return false;
         },
+        // Take the user to the previous node
         ArrowUp: ({ editor }) => {
           // Don't allow enter in the caption
-          if (editor.isActive('imageComponent')) {
+          if (editor.isActive(Nodes.Image)) {
             const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
@@ -123,9 +132,10 @@ export const ImageExtension = (injector: Injector): Node => {
           }
           return false;
         },
+        // Take the user to the next node
         ArrowDown: ({ editor }) => {
           // Don't allow enter in the caption
-          if (editor.isActive('imageComponent')) {
+          if (editor.isActive(Nodes.Image)) {
             const { state } = editor;
             const { selection } = state;
             const { $from } = selection;
@@ -147,13 +157,14 @@ export const ImageExtension = (injector: Injector): Node => {
           }
           return false;
         },
+        // Delete the image if the user is at the beginning of the image
         Backspace: ({ editor }) => {
-          if (editor.isActive('imageComponent')) {
+          if (editor.isActive(Nodes.Image)) {
             const { state } = editor;
             const { selection } = state;
-            const size = selection.$anchor.node().content.size;
-            if (size === 0) {
-              editor.commands.deleteNode('imageComponent');
+
+            if (editor.$pos(selection.from).from === selection.from) {
+              imageService.deleteCurrentImage(editor);
             }
           }
           return false;
@@ -196,7 +207,7 @@ export const ImageExtension = (injector: Injector): Node => {
                   const reader = new FileReader();
 
                   reader.onload = readerEvent => {
-                    const node = schema.nodes['imageComponent'].create({
+                    const node = schema.nodes[Nodes.Image].create({
                       src: readerEvent.target?.result,
                     });
                     const transaction = view.state.tr.insert(
@@ -234,7 +245,7 @@ export const ImageExtension = (injector: Injector): Node => {
                   const reader = new FileReader();
 
                   reader.onload = readerEvent => {
-                    const node = schema.nodes['imageComponent'].create({
+                    const node = schema.nodes[Nodes.Image].create({
                       src: readerEvent.target?.result,
                     });
                     const transaction =

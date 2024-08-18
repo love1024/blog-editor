@@ -2,7 +2,6 @@ import { AnyExtension } from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
 import Strike from '@tiptap/extension-strike';
-import Underline from '@tiptap/extension-underline';
 import Blockquote from '@tiptap/extension-blockquote';
 import ListItem from '@tiptap/extension-list-item';
 import { Plugin } from '@tiptap/pm/state';
@@ -13,9 +12,6 @@ export const getCustomExtension = (): AnyExtension[] => {
       inclusive: false,
     }),
     Italic.extend({
-      inclusive: false,
-    }),
-    Underline.extend({
       inclusive: false,
     }),
     Strike.extend({

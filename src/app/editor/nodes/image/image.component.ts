@@ -15,6 +15,7 @@ import {
   signal,
   viewChild,
   AfterViewInit,
+  OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,6 +32,8 @@ import tippy, { Instance as TippyInstance } from 'tippy.js';
 import mediumZoom from 'medium-zoom';
 import { ImageService } from './image.service';
 import { IMAGE_SCREEN_BREAKPOINTS } from '@core/application/const';
+import { imageTooltipConfig } from './image.config';
+import { EditorEvents, Nodes } from '../../editor-tiptap.model';
 
 @Component({
   selector: 'app-image',
@@ -53,7 +56,7 @@ import { IMAGE_SCREEN_BREAKPOINTS } from '@core/application/const';
 })
 export class ImageComponent
   extends AngularNodeViewComponent
-  implements OnInit, AfterViewInit
+  implements OnInit, AfterViewInit, OnDestroy
 {
   src = signal('');
   isUploaded = signal(false);
@@ -67,84 +70,63 @@ export class ImageComponent
   img = viewChild<ElementRef<HTMLImageElement>>('imgRef');
   imageTooltip = viewChild<ElementRef<HTMLTemplateElement>>('imageTooltip');
   altTextDialog = viewChild<TemplateRef<ElementRef>>('altTextDialog');
-  private readonly dialog = inject(MatDialog);
   private dialogRef?: MatDialogRef<ElementRef<unknown>, string>;
   private tippyRef?: TippyInstance<unknown>;
+  private readonly dialog = inject(MatDialog);
   private readonly imageService = inject(ImageService);
 
   ngOnInit(): void {
-    if (this.node.attrs['src'] instanceof File) {
-      this.toBase64(this.node.attrs['src']).subscribe(base64 => {
-        this.src.set(base64);
-        this.altText.set(this.node.attrs['alt']);
-        this.updateAttributes({ src: base64 });
-      });
-
-      this.imageService.uploadImage(this.node.attrs['src']).subscribe(res => {
-        this.updateAttributes({
-          src: res.name,
-          width: res.width,
-          height: res.height,
-        });
-        this.src.set(res.name);
-        this.imgWidth.set(res.width);
-        this.imgHeight.set(res.height);
-        this.isUploaded.set(true);
-        this.srcset.set(this.generateSrcset(res.width));
-      });
-    } else if (
-      this.node.attrs['src'].endsWith('jpeg') ||
-      this.node.attrs['src'].endsWith('jpg')
-    ) {
-      this.src.set(this.node.attrs['src']);
-      this.altText.set(this.node.attrs['alt']);
-      this.imgWidth.set(this.node.attrs['width']);
-      this.imgHeight.set(this.node.attrs['height']);
-      this.isUploaded.set(true);
-      this.srcset.set(this.generateSrcset(this.imgWidth()));
-    } else {
-      this.src.set(this.node.attrs['src']);
-      this.altText.set(this.node.attrs['alt']);
-    }
     this.editable.set(this.editor.isEditable);
     if (this.editable()) {
-      this.subscribeToSelectionUpdate();
-      this.editor.on('update', () => {
-        this.tippyRef?.hide();
-      });
+      this.listenToEditorEvents();
+    }
+
+    const isImageNew = this.node.attrs['isNew'] as boolean;
+    if (isImageNew) {
+      this.uploadAndRenderImage();
+    } else {
+      this.renderImage();
     }
   }
 
   ngAfterViewInit(): void {
     if (this.editable()) {
-      setTimeout(() => {
-        const target = this.img()?.nativeElement;
-        const content = this.imageTooltip()?.nativeElement.content;
-        if (target && content) {
-          this.tippyRef = tippy(target, {
-            content: content,
-            placement: 'right',
-            interactive: true,
-            allowHTML: true,
-            trigger: 'click',
-          });
-          if (this.inFocus()) {
-            this.tippyRef?.show();
-          }
-        }
-      }, 0);
+      this.initializeTooltip();
     } else {
       mediumZoom(this.img()?.nativeElement);
     }
   }
 
-  @HostListener('window:keyup.Enter', ['$event'])
-  onDialogClick(): void {
-    if (this.dialogRef) {
-      this.dialogRef?.close();
-    }
+  /**
+   * Stop listening to all events if the image is deleted
+   */
+  ngOnDestroy(): void {
+    this.editor.off(
+      EditorEvents.SELECTION_UPDATE,
+      this.onEditorSelectionUpdate
+    );
+    this.editor.off(EditorEvents.UPDATE, this.onEditorUpdate);
   }
 
+  onImageLoaded(): void {
+    // Wait for editor to focus on the image
+    setTimeout(() => this.checkIfNeedToShowTooltip(), 100);
+  }
+
+  /**
+   * On image click, focus on the current node
+   */
+  onImageClick(): void {
+    this.editor.$doc.children.forEach(node => {
+      if (node.node === this.node) {
+        this.editor.commands.focus(node.to - 1);
+      }
+    });
+  }
+
+  /**
+   * Open Alternate text dialog
+   */
   openAltTextDialog(): void {
     this.tippyRef?.hide();
     const dialog = this.altTextDialog();
@@ -163,7 +145,7 @@ export class ImageComponent
         }
 
         if (this.altText().trim() !== '') {
-          this.editor.commands.updateAttributes('imageComponent', {
+          this.editor.commands.updateAttributes(Nodes.Image, {
             alt: this.altText,
           });
         }
@@ -171,32 +153,99 @@ export class ImageComponent
   }
 
   /**
-   * Deletes the current image node from the editor.
+   * Deletes the current image node from the editor by converting it
+   * to a paragraph. This way, it will keep the space.
    */
   deleteImage(): void {
-    this.editor.commands.deleteNode('imageComponent');
+    this.imageService.deleteCurrentImage(this.editor);
   }
 
-  subscribeToSelectionUpdate(): void {
-    this.editor.on('selectionUpdate', () => {
-      const { from, to } = this.editor.state.selection;
-      // We only want to highlight the current image node, so node === this.node
-      let anyImageFound = false;
-      this.editor.state.doc.nodesBetween(from, to, node => {
-        if (node.type.name === 'imageComponent' && node === this.node) {
-          // Only show tooltip if it was not in focus before
-          if (!this.inFocus()) {
-            this.tippyRef?.show();
-          }
-          this.inFocus.set(true);
-          anyImageFound = true;
-        }
+  /**
+   * Close the dialog on Enter press.
+   */
+  @HostListener('window:keyup.Enter', ['$event'])
+  private onEnterClick(): void {
+    if (this.dialogRef) {
+      this.dialogRef?.close();
+    }
+  }
+
+  private uploadAndRenderImage(): void {
+    this.toBase64(this.node.attrs['src']).subscribe(base64 => {
+      this.src.set(base64);
+      this.altText.set(this.node.attrs['alt']);
+      this.updateAttributes({ src: base64 });
+    });
+
+    this.imageService.uploadImage(this.node.attrs['src']).subscribe(res => {
+      this.updateAttributes({
+        src: res.name,
+        width: res.width,
+        height: res.height,
       });
-      if (!anyImageFound) {
-        this.inFocus.set(false);
-        this.tippyRef?.hide();
+      this.src.set(res.name);
+      this.imgWidth.set(res.width);
+      this.imgHeight.set(res.height);
+      this.isUploaded.set(true);
+      this.srcset.set(this.generateSrcset(res.width));
+    });
+  }
+
+  private renderImage(): void {
+    if (
+      this.node.attrs['src'].endsWith('jpeg') ||
+      this.node.attrs['src'].endsWith('jpg')
+    ) {
+      this.src.set(this.node.attrs['src']);
+      this.altText.set(this.node.attrs['alt']);
+      this.imgWidth.set(this.node.attrs['width']);
+      this.imgHeight.set(this.node.attrs['height']);
+      this.isUploaded.set(true);
+      this.srcset.set(this.generateSrcset(this.imgWidth()));
+    } else {
+      // This is only temporarily for local development
+      // if the upload server is not working, then we store image
+      // as base64 string
+      this.src.set(this.node.attrs['src']);
+      this.altText.set(this.node.attrs['alt']);
+    }
+  }
+
+  private initializeTooltip(): void {
+    const target = this.img()?.nativeElement;
+    const content = this.imageTooltip()?.nativeElement.content;
+    if (target && content) {
+      this.tippyRef = tippy(target, {
+        content: content,
+        ...imageTooltipConfig,
+      });
+    }
+  }
+
+  /**
+   * Checks if the tooltip needs to be shown for the image component.
+   */
+  private checkIfNeedToShowTooltip(): void {
+    const { from, to } = this.editor.state.selection;
+    let anyImageFound = false;
+
+    // if the current selection is inside the image node
+    this.editor.state.doc.nodesBetween(from, to, node => {
+      if (node.type.name === Nodes.Image && node === this.node) {
+        // Only show tooltip if it was not in focus before
+        if (!this.inFocus()) {
+          this.tippyRef?.show();
+        }
+        this.inFocus.set(true);
+        anyImageFound = true;
       }
     });
+
+    // If not found, hide the tooltip
+    if (!anyImageFound) {
+      this.inFocus.set(false);
+      this.tippyRef?.hide();
+    }
   }
 
   /**
@@ -204,7 +253,7 @@ export class ImageComponent
    * @param file - The File object to be converted.
    * @returns An Observable that emits the base64 string.
    */
-  toBase64(file: File): Observable<string> {
+  private toBase64(file: File): Observable<string> {
     return new Observable(observer => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -222,10 +271,23 @@ export class ImageComponent
    * @param width - The width of the image.
    * @returns The srcset attribute value as a string.
    */
-  generateSrcset(width: number): string {
+  private generateSrcset(width: number): string {
     // Filter to only include sizes up to the intrinsic width of the image
     return IMAGE_SCREEN_BREAKPOINTS.filter(size => size <= width)
       .map(size => `${size}w`)
       .join(', ');
   }
+
+  private listenToEditorEvents(): void {
+    this.editor.on(EditorEvents.SELECTION_UPDATE, this.onEditorSelectionUpdate);
+    this.editor.on(EditorEvents.UPDATE, this.onEditorUpdate);
+  }
+
+  private onEditorSelectionUpdate = (): void => {
+    this.checkIfNeedToShowTooltip();
+  };
+
+  private onEditorUpdate = (): void => {
+    this.tippyRef?.hide();
+  };
 }

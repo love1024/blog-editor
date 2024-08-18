@@ -19,6 +19,7 @@ import BubbleMenu from '@tiptap/extension-bubble-menu';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import Youtube from '@tiptap/extension-youtube';
+import History from '@tiptap/extension-history';
 import { Heading, Level } from '@tiptap/extension-heading';
 import { EditorTitleComponent } from './editor-title/editor-title.component';
 import { MatIconModule } from '@angular/material/icon';
@@ -90,8 +91,9 @@ export class EditorTiptapComponent implements OnInit {
         OrderedList,
         Text,
         TrailingNode,
+        History,
         Placeholder.configure({
-          placeholder: 'Enter Your Store Here...',
+          placeholder: 'Enter Your Story Here...',
         }),
         Heading.extend({ marks: '' }).configure({
           levels: [2, 3],
@@ -258,6 +260,7 @@ export class EditorTiptapComponent implements OnInit {
         .focus()
         .setImage({
           src: fileList[0],
+          isNew: true, // To indicate that the image is newly uploaded
         })
         .run();
     }
@@ -283,7 +286,6 @@ export class EditorTiptapComponent implements OnInit {
         .clearNodes()
         .unsetMark(Marks.BOLD)
         .unsetMark(Marks.ITALIC)
-        .unsetMark(Marks.UNDERLINE)
         .unsetMark(Marks.STRIKE)
         .toggleHeading({ level })
         .run();
