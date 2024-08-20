@@ -34,7 +34,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { NgClass } from '@angular/common';
-import { getCustomExtension } from './custom-extensions';
+import { getExtendedExtension } from './extend-extensions';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { Mark, Node } from '@tiptap/pm/model';
@@ -129,7 +129,7 @@ export class EditorTiptapComponent implements OnInit {
           },
         }),
         ImageExtension(this.injector),
-        ...getCustomExtension(),
+        ...getExtendedExtension(),
       ],
       onSelectionUpdate: ({ editor }) => {
         const { from, to } = editor.state.selection;

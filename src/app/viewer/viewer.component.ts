@@ -10,7 +10,7 @@ import Heading from '@tiptap/extension-heading';
 import Link from '@tiptap/extension-link';
 import Youtube from '@tiptap/extension-youtube';
 import { ImageExtension } from '../editor/nodes/image/extension';
-import { getCustomExtension } from '../editor/custom-extensions';
+import { getExtendedExtension } from '../editor/extend-extensions';
 import { EditorTitleComponent } from '../editor/editor-title/editor-title.component';
 
 @Component({
@@ -55,7 +55,7 @@ export class ViewerComponent implements OnInit {
           },
         }),
         ImageExtension(this.injector),
-        ...getCustomExtension(),
+        ...getExtendedExtension(),
       ],
     });
   }

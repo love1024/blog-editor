@@ -6,7 +6,7 @@ import Blockquote from '@tiptap/extension-blockquote';
 import ListItem from '@tiptap/extension-list-item';
 import { Plugin } from '@tiptap/pm/state';
 
-export const getCustomExtension = (): AnyExtension[] => {
+export const getExtendedExtension = (): AnyExtension[] => {
   return [
     Bold.extend({
       inclusive: false,

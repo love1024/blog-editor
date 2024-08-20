@@ -48,6 +48,9 @@ export const ImageExtension = (injector: Injector): Node => {
         width: {
           default: null,
         },
+        isNew: {
+          default: false,
+        },
       };
     },
 
@@ -59,17 +62,22 @@ export const ImageExtension = (injector: Injector): Node => {
       ];
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toDOM(node: any) {
-      return ['figure', ['img', node.attrs], ['figurecaption', 0]];
+    ignoreMutation() {
+      return true;
     },
 
     renderHTML({ HTMLAttributes }) {
-      return ['app-image', mergeAttributes(HTMLAttributes)];
+      return ['app-image', mergeAttributes(HTMLAttributes), 'span'];
     },
 
     addNodeView() {
-      return AngularNodeViewRenderer(ImageComponent, { injector });
+      return AngularNodeViewRenderer(ImageComponent, {
+        injector,
+        // Do not refresh the component when it is mutated: while showing tooltip
+        ignoreMutation: () => {
+          return true;
+        },
+      });
     },
 
     addCommands() {

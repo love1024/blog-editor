@@ -14,8 +14,9 @@ import {
   inject,
   signal,
   viewChild,
-  AfterViewInit,
   OnDestroy,
+  ChangeDetectorRef,
+  AfterViewInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -71,9 +72,10 @@ export class ImageComponent
   imageTooltip = viewChild<ElementRef<HTMLTemplateElement>>('imageTooltip');
   altTextDialog = viewChild<TemplateRef<ElementRef>>('altTextDialog');
   private dialogRef?: MatDialogRef<ElementRef<unknown>, string>;
-  private tippyRef?: TippyInstance<unknown>;
+  private tippyRef = signal<TippyInstance<unknown> | undefined>(undefined);
   private readonly dialog = inject(MatDialog);
   private readonly imageService = inject(ImageService);
+  private readonly cd = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.editable.set(this.editor.isEditable);
@@ -120,6 +122,7 @@ export class ImageComponent
     this.editor.$doc.children.forEach(node => {
       if (node.node === this.node) {
         this.editor.commands.focus(node.to - 1);
+        setTimeout(() => this.tippyRef()?.show());
       }
     });
   }
@@ -128,7 +131,7 @@ export class ImageComponent
    * Open Alternate text dialog
    */
   openAltTextDialog(): void {
-    this.tippyRef?.hide();
+    this.tippyRef()?.hide();
     const dialog = this.altTextDialog();
     this.dialogRef =
       dialog &&
@@ -174,7 +177,7 @@ export class ImageComponent
     this.toBase64(this.node.attrs['src']).subscribe(base64 => {
       this.src.set(base64);
       this.altText.set(this.node.attrs['alt']);
-      this.updateAttributes({ src: base64 });
+      this.updateAttributes({ src: base64, isNew: false });
     });
 
     this.imageService.uploadImage(this.node.attrs['src']).subscribe(res => {
@@ -215,10 +218,11 @@ export class ImageComponent
     const target = this.img()?.nativeElement;
     const content = this.imageTooltip()?.nativeElement.content;
     if (target && content) {
-      this.tippyRef = tippy(target, {
+      const ref = tippy(target, {
         content: content,
         ...imageTooltipConfig,
       });
+      this.tippyRef.set(ref);
     }
   }
 
@@ -234,17 +238,19 @@ export class ImageComponent
       if (node.type.name === Nodes.Image && node === this.node) {
         // Only show tooltip if it was not in focus before
         if (!this.inFocus()) {
-          this.tippyRef?.show();
+          this.tippyRef()?.show();
         }
+
         this.inFocus.set(true);
         anyImageFound = true;
       }
     });
 
+    this.cd.markForCheck();
     // If not found, hide the tooltip
     if (!anyImageFound) {
       this.inFocus.set(false);
-      this.tippyRef?.hide();
+      this.tippyRef()?.hide();
     }
   }
 
@@ -288,6 +294,6 @@ export class ImageComponent
   };
 
   private onEditorUpdate = (): void => {
-    this.tippyRef?.hide();
+    this.tippyRef()?.hide();
   };
 }

@@ -1,9 +1,12 @@
 <figure
+  id="figure"
   class="flex flex-col items-center mb-8"
   (mouseenter)="inHover.set(true)"
   (mouseleave)="inHover.set(false)">
   @if (isUploaded()) {
     <img
+      contenteditable="false"
+      class="cursor-pointer"
       (click)="onImageClick()"
       #imgRef
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
@@ -15,11 +18,13 @@
       sizes="(max-width: 600px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, (max-width: 1280px) 60vw, 50vw" />
   } @else {
     <img
+      contenteditable="false"
+      class="cursor-pointer"
       (click)="onImageClick()"
-      #imgRef
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
       [src]="src()"
       [attr.alt]="altText()"
+      #imgRef
       (load)="onImageLoaded()" />
   }
 
