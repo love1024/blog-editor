@@ -5,6 +5,14 @@ import Strike from '@tiptap/extension-strike';
 import Blockquote from '@tiptap/extension-blockquote';
 import ListItem from '@tiptap/extension-list-item';
 import { Plugin } from '@tiptap/pm/state';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
+import js from 'highlight.js/lib/languages/javascript';
+
+// Create a lowlight instance with the common languages
+export const lowlight = createLowlight(common);
+lowlight.register(common);
+lowlight.register('js', js);
 
 export const getExtendedExtension = (): AnyExtension[] => {
   return [
@@ -78,5 +86,17 @@ export const getExtendedExtension = (): AnyExtension[] => {
       // We only want paragraphs inside the list and not other nodes such as images
       content: 'paragraph+',
     }),
+    CodeBlockLowlight.extend({
+      addKeyboardShortcuts() {
+        return {
+          Tab: () => {
+            if (this.editor.isActive('codeBlock')) {
+              return this.editor.commands.insertContent('\t');
+            }
+            return false;
+          },
+        };
+      },
+    }).configure({ lowlight: lowlight }),
   ];
 };

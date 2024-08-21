@@ -9,6 +9,7 @@ export const Nodes = {
   BLOCKQUOTE: 'blockquote',
   Heading: 'heading',
   Image: 'imageComponent',
+  CodeBlock: 'codeBlock',
 };
 
 export enum EditorEvents {

@@ -107,8 +107,13 @@
         <button
           matTooltip="Code Block"
           class="ml-3"
-          [disabled]="disableFormatting || disabled">
-          <i class="ri-code-block"></i>
+          [disabled]="disableFormatting || disabled"
+          (click)="toggleCodeblock()">
+          <i
+            class="ri-code-block"
+            [ngClass]="{
+              'toolbar-active': editor?.isActive('codeBlock'),
+            }"></i>
         </button>
 
         <!-- <i class="ri-separator"></i> -->

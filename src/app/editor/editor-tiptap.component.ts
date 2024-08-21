@@ -315,6 +315,10 @@ export class EditorTiptapComponent implements OnInit {
     this.editor?.chain().focus().toggleOrderedList().run();
   }
 
+  toggleCodeblock(): void {
+    this.editor?.chain().focus().toggleCodeBlock().run();
+  }
+
   /**
    * Get link mark out of the node
    * @param node
