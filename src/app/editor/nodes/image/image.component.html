@@ -1,12 +1,10 @@
 <figure
-  id="figure"
   class="flex flex-col items-center mb-8"
   (mouseenter)="inHover.set(true)"
   (mouseleave)="inHover.set(false)">
   @if (isUploaded()) {
     <img
       contenteditable="false"
-      class="cursor-pointer"
       (click)="onImageClick()"
       #imgRef
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
@@ -19,7 +17,6 @@
   } @else {
     <img
       contenteditable="false"
-      class="cursor-pointer"
       (click)="onImageClick()"
       [ngClass]="{ highlight: editable() && (inFocus() || inHover()) }"
       [src]="src()"

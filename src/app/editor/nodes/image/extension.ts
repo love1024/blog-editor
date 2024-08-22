@@ -31,8 +31,6 @@ export const ImageExtension = (injector: Injector): Node => {
     content: 'inline*', // What content can go inside this node - Only inline nodes
     marks: 'bold link',
     draggable: true,
-    isolating: true,
-    selectable: true,
 
     addAttributes() {
       return {
@@ -62,10 +60,6 @@ export const ImageExtension = (injector: Injector): Node => {
       ];
     },
 
-    ignoreMutation() {
-      return true;
-    },
-
     renderHTML({ HTMLAttributes }) {
       return ['app-image', mergeAttributes(HTMLAttributes), 'span'];
     },
@@ -74,7 +68,10 @@ export const ImageExtension = (injector: Injector): Node => {
       return AngularNodeViewRenderer(ImageComponent, {
         injector,
         // Do not refresh the component when it is mutated: while showing tooltip
-        ignoreMutation: () => {
+        ignoreMutation: mutation => {
+          if (mutation.mutation.type === 'selection') {
+            return false;
+          }
           return true;
         },
       });
@@ -181,6 +178,7 @@ export const ImageExtension = (injector: Injector): Node => {
     },
 
     addProseMirrorPlugins() {
+      const editor = this.editor;
       return [
         new Plugin({
           props: {
@@ -205,26 +203,11 @@ export const ImageExtension = (injector: Injector): Node => {
 
                 event.preventDefault();
 
-                const { schema } = view.state;
-                const coordinates = view.posAtCoords({
-                  left: event.clientX,
-                  top: event.clientY,
-                });
-
                 images.forEach(image => {
-                  const reader = new FileReader();
-
-                  reader.onload = readerEvent => {
-                    const node = schema.nodes[Nodes.Image].create({
-                      src: readerEvent.target?.result,
-                    });
-                    const transaction = view.state.tr.insert(
-                      coordinates?.pos || 0,
-                      node
-                    );
-                    view.dispatch(transaction);
-                  };
-                  reader.readAsDataURL(image);
+                  editor.commands.setImage({
+                    src: image,
+                    isNew: true,
+                  });
                 });
               },
               paste(view, event) {
@@ -247,20 +230,11 @@ export const ImageExtension = (injector: Injector): Node => {
 
                 event.preventDefault();
 
-                const { schema } = view.state;
-
                 images.forEach(image => {
-                  const reader = new FileReader();
-
-                  reader.onload = readerEvent => {
-                    const node = schema.nodes[Nodes.Image].create({
-                      src: readerEvent.target?.result,
-                    });
-                    const transaction =
-                      view.state.tr.replaceSelectionWith(node);
-                    view.dispatch(transaction);
-                  };
-                  reader.readAsDataURL(image);
+                  editor.commands.setImage({
+                    src: image,
+                    isNew: true,
+                  });
                 });
               },
             },

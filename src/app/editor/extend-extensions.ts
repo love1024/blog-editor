@@ -1,4 +1,4 @@
-import { AnyExtension, markInputRule } from '@tiptap/core';
+import { AnyExtension } from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
 import Strike from '@tiptap/extension-strike';
