@@ -7,6 +7,7 @@ import {
   TemplateRef,
   ViewChild,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
@@ -65,6 +66,8 @@ export class EditorTiptapComponent implements OnInit {
   disableFormatting = false; // Disable formatting for headings
   disabled = false;
   isSelection = false; // Whether any text is selected by the user or not
+  isLink = signal(false);
+
   link = '';
   @ViewChild('linkDialog') linkDialog!: TemplateRef<ElementRef>;
   fileUploader = viewChild<ElementRef>('fileUploader');
@@ -135,14 +138,15 @@ export class EditorTiptapComponent implements OnInit {
         const { from, to } = editor.state.selection;
         const node = editor.state.doc.nodeAt(from);
         if (node) {
-          // Show the selection even if no text is selected
-          // but the link is already there
+          // Check if link mark exists
           const link = node.marks.filter(mark => mark.type.name === Marks.LINK);
           if (link.length > 0) {
-            this.isSelection = true;
-            return;
+            this.isLink.set(true);
+          } else {
+            this.isLink.set(false);
           }
         }
+
         this.isSelection = from !== to;
         this.disableFormatting = editor.isActive(Nodes.Heading);
 
@@ -317,6 +321,10 @@ export class EditorTiptapComponent implements OnInit {
 
   toggleCodeblock(): void {
     this.editor?.chain().focus().toggleCodeBlock().run();
+  }
+
+  toggleCode(): void {
+    this.editor?.chain().focus().toggleCode().run();
   }
 
   /**

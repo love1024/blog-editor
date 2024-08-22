@@ -3,6 +3,7 @@ export const Marks = {
   ITALIC: 'italic',
   LINK: 'link',
   STRIKE: 'strike',
+  Code: 'code',
 };
 
 export const Nodes = {

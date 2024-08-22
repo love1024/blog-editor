@@ -1,9 +1,10 @@
-import { AnyExtension } from '@tiptap/core';
+import { AnyExtension, markInputRule } from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
 import Strike from '@tiptap/extension-strike';
 import Blockquote from '@tiptap/extension-blockquote';
 import ListItem from '@tiptap/extension-list-item';
+import Code from '@tiptap/extension-code';
 import { Plugin } from '@tiptap/pm/state';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
@@ -25,6 +26,7 @@ export const getExtendedExtension = (): AnyExtension[] => {
     Strike.extend({
       inclusive: false,
     }),
+    Code,
     Blockquote.extend({
       content: 'paragraph', // Only allow one paragraph
       addProseMirrorPlugins() {

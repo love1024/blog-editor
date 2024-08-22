@@ -200,8 +200,16 @@ blockquote:after {
 
   Based on the Tomorrow Night Eighties theme: https://github.com/isagalaev/highlight.js/blob/master/src/styles/tomorrow-night-eighties.css
 */
+
+.tiptap code {
+  background-color: #ecedee;
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  font-size: 1rem;
+}
+
 .tiptap pre {
-  background-color: #f1f3f4;
+  background-color: #ecedee;
   border-radius: 0.5rem;
   padding: 1rem;
   overflow-x: auto;

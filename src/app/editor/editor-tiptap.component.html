@@ -67,7 +67,7 @@
         <button
           matTooltip="Link"
           class="ml-3"
-          [disabled]="disabled || !isSelection"
+          [disabled]="disabled || (!isLink() && !isSelection)"
           (click)="toggleLink()"
           [ngClass]="{ 'toolbar-active': editor?.isActive('link') }">
           <i class="ri-link"></i>
@@ -104,15 +104,30 @@
           (click)="openYoutubeDialog()">
           <i class="ri-youtube-line"></i>
         </button>
+
+        <!-- <i class="ri-separator"></i> -->
+      </span>
+
+      <span class="ml-12">
         <button
           matTooltip="Code Block"
-          class="ml-3"
           [disabled]="disableFormatting || disabled"
           (click)="toggleCodeblock()">
           <i
             class="ri-code-block"
             [ngClass]="{
               'toolbar-active': editor?.isActive('codeBlock'),
+            }"></i>
+        </button>
+        <button
+          matTooltip="Code"
+          class="ml-3"
+          [disabled]="disableFormatting || !isSelection"
+          (click)="toggleCode()">
+          <i
+            class="ri-code-line"
+            [ngClass]="{
+              'toolbar-active': editor?.isActive('code'),
             }"></i>
         </button>
 
