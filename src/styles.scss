@@ -112,8 +112,9 @@ blockquote strong {
 }
 
 // Width of children
-.tiptap > * {
-  width: 50%;
+.tiptap > *,
+#title {
+  max-width: 680px;
   display: block;
   margin: 0 auto;
 }
@@ -141,6 +142,10 @@ blockquote strong {
 
 .tiptap h2 {
   font-size: 1.5em;
+}
+
+.tiptap .readonly-video {
+  pointer-events: none;
 }
 
 button[disabled] i {
@@ -285,5 +290,14 @@ blockquote:after {
   .hljs-keyword,
   .hljs-selector-tag {
     font-weight: 700;
+  }
+}
+
+// Media queries
+
+@media only screen and (max-width: 680px) {
+  .tiptap > *,
+  #title {
+    width: 90%;
   }
 }

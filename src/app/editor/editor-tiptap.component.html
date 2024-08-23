@@ -1,185 +1,21 @@
 <div class="w-full flex items-center flex-col pt-14">
   <div class="pt-12 w-full">
     <!-- Toolbar  -->
-    <div
-      class="fixed bg-white top-12 border-0 border-b w-full z-10 left-0 flex justify-center text-2xl">
-      <span>
-        <button
-          type="button"
-          [disabled]="disabled"
-          matTooltip="Heading"
-          [ngClass]="{
-            'toolbar-active': editor?.isActive('heading', { level: 2 }),
-          }"
-          (click)="toggleHeading(2)"
-          (keydown.enter)="toggleHeading(2)">
-          <i class="ri-h-2"></i>
-        </button>
-        <button
-          type="button"
-          class="ml-3"
-          [disabled]="disabled"
-          matTooltip="Subheading"
-          [ngClass]="{
-            'toolbar-active': editor?.isActive('heading', { level: 3 }),
-          }"
-          (click)="toggleHeading(3)"
-          (keydown.enter)="toggleHeading(3)">
-          <i class="ri-h-3"></i>
-        </button>
-      </span>
-      <span class="ml-12">
-        <button
-          type="button"
-          matTooltip="Bold"
-          [disabled]="disableFormatting || disabled"
-          (click)="toggleMark('bold')"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('bold') }">
-          <i class="ri-bold"></i>
-        </button>
-        <button
-          type="button"
-          class="ml-3"
-          matTooltip="Italic"
-          [disabled]="disableFormatting || disabled"
-          (click)="toggleMark('italic')"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('italic') }">
-          <i class="ri-italic"></i>
-        </button>
-        <button
-          type="button"
-          class="ml-3"
-          matTooltip="Strikethrough"
-          [disabled]="disableFormatting || disabled"
-          (click)="toggleMark('strike')"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('strike') }">
-          <i class="ri-strikethrough"></i>
-        </button>
-      </span>
-      <span class="ml-12">
-        <button
-          matTooltip="Blockquote"
-          [disabled]="disabled"
-          (click)="toggleBlockquote()"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('blockquote') }">
-          <i class="ri-double-quotes-r"></i>
-        </button>
-        <button
-          matTooltip="Link"
-          class="ml-3"
-          [disabled]="disabled || (!isLink() && !isSelection)"
-          (click)="toggleLink()"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('link') }">
-          <i class="ri-link"></i>
-        </button>
-      </span>
-      <span class="ml-12">
-        <button
-          matTooltip="Ordered List"
-          (click)="toggleBulletList()"
-          [disabled]="disableFormatting || disabled"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('bulletList') }">
-          <i class="ri-list-ordered"></i>
-        </button>
-        <button
-          matTooltip="Unordered List"
-          class="ml-3"
-          (click)="toggleOrderedList()"
-          [disabled]="disableFormatting || disabled"
-          [ngClass]="{ 'toolbar-active': editor?.isActive('orderedList') }">
-          <i class="ri-list-unordered"></i>
-        </button>
-      </span>
-      <span class="ml-12">
-        <button
-          matTooltip="Image"
-          [disabled]="disableFormatting || disabled"
-          (click)="addImage()">
-          <i class="ri-image-line"></i>
-        </button>
-        <button
-          matTooltip="Youtube"
-          class="ml-3"
-          [disabled]="disableFormatting || disabled"
-          (click)="openYoutubeDialog()">
-          <i class="ri-youtube-line"></i>
-        </button>
-
-        <!-- <i class="ri-separator"></i> -->
-      </span>
-
-      <span class="ml-12">
-        <button
-          matTooltip="Code Block"
-          [disabled]="disableFormatting || disabled"
-          (click)="toggleCodeblock()">
-          <i
-            class="ri-code-block"
-            [ngClass]="{
-              'toolbar-active': editor?.isActive('codeBlock'),
-            }"></i>
-        </button>
-        <button
-          matTooltip="Code"
-          class="ml-3"
-          [disabled]="disableFormatting || !isSelection"
-          (click)="toggleCode()">
-          <i
-            class="ri-code-line"
-            [ngClass]="{
-              'toolbar-active': editor?.isActive('code'),
-            }"></i>
-        </button>
-
-        <!-- <i class="ri-separator"></i> -->
-      </span>
+    <div class="fixed bg-white top-12 border-0 border-b w-full z-10 left-0">
+      <app-editor-toolbar
+        [editor]="editor"
+        [disabled]="disabled()"
+        [disableFormatting]="disableFormatting()"
+        [isSelection]="isSelection()"
+        [isLink]="isLink()"
+        [linkUrl]="linkUrl()" />
     </div>
 
     <!-- Editor Title  -->
-    <div class="w-full py-3">
-      <app-editor-title
-        class="block w-1/2 mx-auto"
-        (focused)="disabled = true" />
+    <div class="py-3" id="title">
+      <app-editor-title class="block mx-auto" (focused)="disabled.set(true)" />
     </div>
 
-    <div id="editor"></div>
+    <div id="editor" class="pb-4"></div>
   </div>
 </div>
-
-<div id="linkBubble" class="text-white text-center relative pr-6">
-  <a
-    target="_blank"
-    class="break-words block"
-    rel="noopener noreferrer nofollow w-11/12"
-    [href]="link"
-    >{{ link }}</a
-  >
-  <div class="absolute right-0 top-0 h-full flex items-center text-lg">
-    <i
-      tabindex="0"
-      class="ri-edit-line"
-      (click)="onLinkEdit()"
-      (keydown.enter)="onLinkEdit()"></i>
-  </div>
-</div>
-
-<ng-template #linkDialog>
-  <mat-dialog-content>
-    <mat-form-field class="w-full">
-      <mat-label>Paste Your Link Here...</mat-label>
-      <input matInput [(ngModel)]="link" type="text" cdkFocusInitial />
-    </mat-form-field>
-  </mat-dialog-content>
-  <mat-dialog-actions>
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button [mat-dialog-close]="link">Add</button>
-  </mat-dialog-actions>
-</ng-template>
-
-<input
-  type="file"
-  id="fileUploader"
-  #fileUploader
-  name="image"
-  (change)="uploadFile($event)"
-  (click)="onFileUploadClick($event)" />

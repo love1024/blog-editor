@@ -1,0 +1,170 @@
+<div class="flex justify-center text-2xl overflow-x-scroll whitespace-nowrap">
+  <span>
+    <button
+      type="button"
+      [disabled]="disabled()"
+      matTooltip="Heading"
+      [ngClass]="{
+        'toolbar-active': editor()?.isActive('heading', { level: 2 }),
+      }"
+      (click)="toggleHeading(2)"
+      (keydown.enter)="toggleHeading(2)">
+      <i class="ri-h-2"></i>
+    </button>
+    <button
+      type="button"
+      class="ml-3"
+      [disabled]="disabled()"
+      matTooltip="Subheading"
+      [ngClass]="{
+        'toolbar-active': editor()?.isActive('heading', { level: 3 }),
+      }"
+      (click)="toggleHeading(3)"
+      (keydown.enter)="toggleHeading(3)">
+      <i class="ri-h-3"></i>
+    </button>
+  </span>
+  <span class="ml-12">
+    <button
+      type="button"
+      matTooltip="Bold"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="toggleMark('bold')"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('bold') }">
+      <i class="ri-bold"></i>
+    </button>
+    <button
+      type="button"
+      class="ml-3"
+      matTooltip="Italic"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="toggleMark('italic')"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('italic') }">
+      <i class="ri-italic"></i>
+    </button>
+    <button
+      type="button"
+      class="ml-3"
+      matTooltip="Strikethrough"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="toggleMark('strike')"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('strike') }">
+      <i class="ri-strikethrough"></i>
+    </button>
+  </span>
+  <span class="ml-12">
+    <button
+      matTooltip="Blockquote"
+      [disabled]="disabled()"
+      (click)="toggleBlockquote()"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('blockquote') }">
+      <i class="ri-double-quotes-r"></i>
+    </button>
+    <button
+      matTooltip="Link"
+      class="ml-3"
+      [disabled]="disabled() || (!isLink() && !isSelection)"
+      (click)="toggleLink()"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('link') }">
+      <i class="ri-link"></i>
+    </button>
+  </span>
+  <span class="ml-12">
+    <button
+      matTooltip="Ordered List"
+      (click)="toggleBulletList()"
+      [disabled]="disabled() || disableFormatting()"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('bulletList') }">
+      <i class="ri-list-ordered"></i>
+    </button>
+    <button
+      matTooltip="Unordered List"
+      class="ml-3"
+      (click)="toggleOrderedList()"
+      [disabled]="disabled() || disableFormatting()"
+      [ngClass]="{ 'toolbar-active': editor()?.isActive('orderedList') }">
+      <i class="ri-list-unordered"></i>
+    </button>
+  </span>
+  <span class="ml-12">
+    <button
+      matTooltip="Image"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="addImage()">
+      <i class="ri-image-line"></i>
+    </button>
+    <button
+      matTooltip="Youtube"
+      class="ml-3"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="openYoutubeDialog()">
+      <i class="ri-youtube-line"></i>
+    </button>
+
+    <!-- <i class="ri-separator"></i> -->
+  </span>
+
+  <span class="ml-12">
+    <button
+      matTooltip="Code Block"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="toggleCodeblock()">
+      <i
+        class="ri-code-block"
+        [ngClass]="{
+          'toolbar-active': editor()?.isActive('codeBlock'),
+        }"></i>
+    </button>
+    <button
+      matTooltip="Code"
+      class="ml-3"
+      [disabled]="disabled() || disableFormatting()"
+      (click)="toggleCode()">
+      <i
+        class="ri-code-line"
+        [ngClass]="{
+          'toolbar-active': editor()?.isActive('code'),
+        }"></i>
+    </button>
+
+    <!-- <i class="ri-separator"></i> -->
+  </span>
+</div>
+
+<div id="linkBubble" class="text-white text-center relative pr-6">
+  <a
+    target="_blank"
+    class="break-words block"
+    rel="noopener noreferrer nofollow w-11/12"
+    [href]="link()"
+    >{{ link() }}</a
+  >
+  <div class="absolute right-0 top-0 h-full flex items-center text-lg">
+    <i
+      tabindex="0"
+      class="ri-edit-line"
+      (click)="onLinkEdit()"
+      (keydown.enter)="onLinkEdit()"></i>
+  </div>
+</div>
+
+<ng-template #linkDialog>
+  <mat-dialog-content>
+    <mat-form-field class="w-full">
+      <mat-label>Paste Your Link Here...</mat-label>
+      <input matInput [(ngModel)]="link" type="text" cdkFocusInitial />
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-button [mat-dialog-close]="link()">Add</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<input
+  type="file"
+  id="fileUploader"
+  #fileUploader
+  name="image"
+  (change)="uploadFile($event)"
+  (click)="onFileUploadClick($event)" />

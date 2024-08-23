@@ -69,7 +69,12 @@ export const ImageExtension = (injector: Injector): Node => {
         injector,
         // Do not refresh the component when it is mutated: while showing tooltip
         ignoreMutation: mutation => {
-          if (mutation.mutation.type === 'selection') {
+          // Don't ignore selection and characterData mutations, otherwise
+          // ignore all DOM changes in this component like for showing tooltip
+          if (
+            mutation.mutation.type === 'selection' ||
+            mutation.mutation.type === 'characterData'
+          ) {
             return false;
           }
           return true;

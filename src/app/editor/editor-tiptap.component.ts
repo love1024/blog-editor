@@ -1,15 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  Injector,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, Injector, OnInit, inject, signal } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import Placeholder from '@tiptap/extension-placeholder';
 import Document from '@tiptap/extension-document';
@@ -21,66 +10,30 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import Youtube from '@tiptap/extension-youtube';
 import History from '@tiptap/extension-history';
-import { Heading, Level } from '@tiptap/extension-heading';
+import { Heading } from '@tiptap/extension-heading';
 import { EditorTitleComponent } from './editor-title/editor-title.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import {
-  MatDialog,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { NgClass } from '@angular/common';
 import { getExtendedExtension } from './extend-extensions';
-import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
 import { Mark, Node } from '@tiptap/pm/model';
 import { Marks, Nodes } from './editor-tiptap.model';
 import { TrailingNode } from './extensions/trailing-node';
 import { ImageExtension } from './nodes/image/extension';
+import { EditorToolbarComponent } from './editor-toolbar/editor-toolbar.component';
 
 @Component({
   selector: 'app-editor-tiptap',
   standalone: true,
-  imports: [
-    EditorTitleComponent,
-    MatIconModule,
-    MatTooltipModule,
-    NgClass,
-    FormsModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-  ],
+  imports: [EditorTitleComponent, EditorToolbarComponent],
   templateUrl: './editor-tiptap.component.html',
   styleUrl: './editor-tiptap.component.scss',
 })
 export class EditorTiptapComponent implements OnInit {
   editor?: Editor;
-  disableFormatting = false; // Disable formatting for headings
-  disabled = false;
-  isSelection = false; // Whether any text is selected by the user or not
+  disableFormatting = signal(false); // Disable formatting for headings
+  disabled = signal(false);
+  isSelection = signal(false); // Whether any text is selected by the user or not
   isLink = signal(false);
-
-  link = '';
-  @ViewChild('linkDialog') linkDialog!: TemplateRef<ElementRef>;
-  fileUploader = viewChild<ElementRef>('fileUploader');
-  private readonly dialog = inject(MatDialog);
+  linkUrl = signal('');
   private readonly injector = inject(Injector);
-  private dialogRef?: MatDialogRef<ElementRef<unknown>, string>;
-
-  @HostListener('window:keyup.Enter', ['$event'])
-  onDialogClick(): void {
-    if (this.dialogRef) {
-      this.dialogRef?.close();
-    }
-  }
 
   ngOnInit(): void {
     const content = localStorage.getItem('DATA');
@@ -109,7 +62,7 @@ export class EditorTiptapComponent implements OnInit {
         Youtube.configure({
           nocookie: true,
           HTMLAttributes: {
-            class: 'mx-auto',
+            class: 'mx-auto readonly-video',
           },
         }),
         BubbleMenu.configure({
@@ -124,7 +77,7 @@ export class EditorTiptapComponent implements OnInit {
               const linkMark =
                 this.getLinkMark(fromNode) || this.getLinkMark(toNode);
               if (linkMark) {
-                this.link = linkMark?.attrs['href'] || '';
+                this.linkUrl.set(linkMark?.attrs['href'] || '');
                 return true;
               }
             }
@@ -147,8 +100,8 @@ export class EditorTiptapComponent implements OnInit {
           }
         }
 
-        this.isSelection = from !== to;
-        this.disableFormatting = editor.isActive(Nodes.Heading);
+        this.isSelection.set(from !== to);
+        this.disableFormatting.set(editor.isActive(Nodes.Heading));
 
         // Update scroll position
         const coords = editor.view.coordsAtPos(editor.state.selection.from);
@@ -163,168 +116,16 @@ export class EditorTiptapComponent implements OnInit {
         }
       },
       onFocus: ({ editor }) => {
-        this.disabled = false;
-        this.disableFormatting = editor.isActive(Nodes.Heading);
+        this.disabled.set(false);
+        this.disableFormatting.set(editor.isActive(Nodes.Heading));
       },
       onUpdate: ({ editor }) => {
-        this.disableFormatting = editor.isActive(Nodes.Heading);
+        this.disableFormatting.set(editor.isActive(Nodes.Heading));
 
         localStorage.setItem('DATA', JSON.stringify(editor.getJSON()));
       },
       content: JSON.parse(content || ''),
     });
-  }
-
-  onLinkEdit(): void {
-    this.openLinkDialog();
-  }
-
-  toggleLink(): void {
-    if (this.editor?.isActive(Marks.LINK)) {
-      this.editor?.chain().focus().unsetLink().run();
-
-      // Check if after disabling, we need to show link menu or not
-      const { from, to } = this.editor?.state?.selection || { from: 0, to: 0 };
-      this.isSelection = from !== to;
-    } else {
-      this.openLinkDialog();
-    }
-  }
-
-  openLinkDialog(): void {
-    this.link = this.editor?.getAttributes(Marks.LINK)['href'];
-
-    this.dialogRef = this.dialog.open(this.linkDialog);
-
-    this.dialogRef
-      .afterClosed()
-      .pipe(finalize(() => (this.dialogRef = undefined)))
-      .subscribe(() => {
-        // if cancelled
-        if (this.link === undefined) {
-          return;
-        }
-
-        // if empty link is given
-        if (this.link.trim() === '') {
-          this.editor
-            ?.chain()
-            .focus()
-            .extendMarkRange(Marks.LINK)
-            .unsetLink()
-            .run();
-        } else {
-          this.editor
-            ?.chain()
-            .focus()
-            .extendMarkRange(Marks.LINK)
-            .setLink({ href: this.link })
-            .run();
-        }
-      });
-  }
-
-  openYoutubeDialog(): void {
-    this.link = this.editor?.getAttributes(Marks.LINK)['href'];
-
-    this.dialogRef = this.dialog.open(this.linkDialog);
-    //https://www.youtube.com/watch?v=dZVjHCXvFWM
-    this.dialogRef
-      .afterClosed()
-      .pipe(finalize(() => (this.dialogRef = undefined)))
-      .subscribe(() => {
-        // if cancelled
-        if (this.link === undefined) {
-          return;
-        }
-
-        // if empty link is given
-        if (this.link.trim() !== '') {
-          this.editor
-            ?.chain()
-            .focus()
-            .setYoutubeVideo({
-              src: this.link,
-            })
-            .run();
-        }
-      });
-  }
-
-  addImage(): void {
-    this.fileUploader()?.nativeElement.click();
-  }
-
-  uploadFile(event: Event): void {
-    const element = event.currentTarget as HTMLInputElement;
-    const fileList: FileList | null = element.files;
-    if (fileList && fileList.length > 0) {
-      this.editor
-        ?.chain()
-        .focus()
-        .setImage({
-          src: fileList[0],
-          isNew: true, // To indicate that the image is newly uploaded
-        })
-        .run();
-    }
-  }
-
-  onFileUploadClick(event: Event): void {
-    const element = event.currentTarget as HTMLInputElement;
-    element.value = '';
-  }
-
-  toggleMark(mark: string): void {
-    this.editor?.chain().focus().toggleMark(mark).run();
-  }
-
-  toggleHeading(level: Level): void {
-    // If header is already applied, we don't need to clear it, just toggle it
-    if (this.editor?.isActive(Nodes.Heading, { level })) {
-      this.editor?.chain().focus().toggleHeading({ level }).run();
-    } else {
-      this.editor
-        ?.chain()
-        .focus()
-        .clearNodes()
-        .unsetMark(Marks.BOLD)
-        .unsetMark(Marks.ITALIC)
-        .unsetMark(Marks.STRIKE)
-        .toggleHeading({ level })
-        .run();
-    }
-  }
-
-  toggleBlockquote(): void {
-    // If blockquote is already applied, we don't need to clear it, just toggle it
-    if (this.editor?.isActive(Nodes.BLOCKQUOTE)) {
-      this.editor?.chain().focus().toggleBlockquote().run();
-    } else {
-      this.editor
-        ?.chain()
-        .focus()
-        .clearNodes()
-        .unsetAllMarks()
-        .toggleBlockquote()
-        .run();
-    }
-  }
-
-  toggleBulletList(): void {
-    this.editor?.chain().focus().toggleBulletList().run();
-  }
-
-  toggleOrderedList(): void {
-    this.editor?.chain().focus().toggleOrderedList().run();
-  }
-
-  toggleCodeblock(): void {
-    this.editor?.chain().focus().toggleCodeBlock().run();
-  }
-
-  toggleCode(): void {
-    this.editor?.chain().focus().toggleCode().run();
   }
 
   /**
