@@ -38,6 +38,8 @@ $readolio-theme: mat.define-theme(
 /* You can add global styles to this file, and also import other style files */
 
 @import '../node_modules/tippy.js/dist/tippy';
+@import '../node_modules/tippy.js/themes/light.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

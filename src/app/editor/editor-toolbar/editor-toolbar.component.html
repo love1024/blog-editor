@@ -148,6 +148,45 @@
   </div>
 </div>
 
+<div id="floatMenu" class="flex bg-light">
+  <button
+    type="button"
+    matTooltip="Heading"
+    (click)="toggleHeading(2)"
+    (keydown.enter)="toggleHeading(2)">
+    <i class="ri-h-2 text-lg"></i>
+  </button>
+  <button
+    type="button"
+    class="ml-3"
+    matTooltip="Subheading"
+    (click)="toggleHeading(3)"
+    (keydown.enter)="toggleHeading(3)">
+    <i class="ri-h-3 text-lg"></i>
+  </button>
+  <button
+    matTooltip="Image"
+    class="ml-3"
+    (click)="addImage()"
+    (keydown.enter)="addImage()">
+    <i class="ri-image-line text-lg"></i>
+  </button>
+  <button
+    matTooltip="Youtube"
+    class="ml-3"
+    (click)="openYoutubeDialog()"
+    (keydown.enter)="openYoutubeDialog()">
+    <i class="ri-youtube-line text-lg"></i>
+  </button>
+  <button
+    matTooltip="Code Block"
+    class="ml-3"
+    (click)="toggleCodeblock()"
+    (keydown.enter)="toggleCodeblock()">
+    <i class="ri-code-block text-lg"></i>
+  </button>
+</div>
+
 <ng-template #linkDialog>
   <mat-dialog-content>
     <mat-form-field class="w-full">

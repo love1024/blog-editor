@@ -18,6 +18,7 @@ import { Marks, Nodes } from './editor-tiptap.model';
 import { TrailingNode } from './extensions/trailing-node';
 import { ImageExtension } from './nodes/image/extension';
 import { EditorToolbarComponent } from './editor-toolbar/editor-toolbar.component';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 
 @Component({
   selector: 'app-editor-tiptap',
@@ -48,6 +49,38 @@ export class EditorTiptapComponent implements OnInit {
         Text,
         TrailingNode,
         History,
+        FloatingMenu.configure({
+          element: document.querySelector('#floatMenu') as HTMLElement,
+          tippyOptions: {
+            arrow: false,
+            theme: 'light',
+          },
+          shouldShow: ({ view, state, editor }) => {
+            const { selection } = state;
+            const { $anchor, empty } = selection;
+            const isRootDepth = $anchor.depth === 1;
+            const isEmptyTextBlock =
+              $anchor.parent.isTextblock &&
+              !$anchor.parent.type.spec.code &&
+              !$anchor.parent.textContent;
+
+            // Needed should show to hide after the user clicks on the paragraph
+            const isHeading = $anchor.parent.type.name === 'heading';
+
+            if (
+              isHeading ||
+              !view.hasFocus() ||
+              !empty ||
+              !isRootDepth ||
+              !isEmptyTextBlock ||
+              !editor.isEditable
+            ) {
+              return false;
+            }
+
+            return true;
+          },
+        }),
         Placeholder.configure({
           placeholder: 'Enter Your Story Here...',
         }),
