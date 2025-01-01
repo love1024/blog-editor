@@ -1,6 +1,6 @@
 # WYSIWYG Editor
 
-Editor provides a set of tools for building rich text editors, using a user interface inspired by what-you-see-is-what-you-get, but trying to avoid the pitfalls of that style of editing. It supports JSON for saving and viewing blogs.
+Editor provides a set of tools for building rich text editors, using a user interface inspired by what-you-see-is-what-you-get, but trying to avoid the pitfalls of that style of editing. It supports JSON for saving and viewing blogs. Built using Angular.
 
 ## Support Text Formatting
 
