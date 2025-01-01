@@ -1,27 +1,29 @@
-# Readolio
+# WYSIWYG Editor
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.6.
+Editor provides a set of tools for building rich text editors, using a user interface inspired by what-you-see-is-what-you-get, but trying to avoid the pitfalls of that style of editing. It supports JSON for saving and viewing blogs.
 
-## Development server
+## Support Text Formatting
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+![image](https://github.com/user-attachments/assets/2b84c4d4-d90f-498f-a760-0cad558829df)
 
-## Code scaffolding
+## Image Uploads
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+![image](https://github.com/user-attachments/assets/c7501d7a-a419-4cda-bcde-33dc02d2b5ae)
 
-## Build
+## Youtube Video Embedding
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+![image](https://github.com/user-attachments/assets/1cd8bd6f-d228-4042-bd5a-04f3c6b819f4)  
 
-## Running unit tests
+## Code Blocks
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+![image](https://github.com/user-attachments/assets/b8820338-5464-4c8a-aae6-bcaf97a2f29c)
 
-## Running end-to-end tests
+## Floating Menu
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+![image](https://github.com/user-attachments/assets/004797d2-d925-432f-8cc8-4bf6f2fab65f)
 
-## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+
+
